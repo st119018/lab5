@@ -26,7 +26,7 @@ void AddressClient::answer(){
 
 void AddressClient::processRequest(){
     
-    if (!findEnter()) {
+    if (!findStar()) {
         return; // message is not full
     }
     
@@ -78,13 +78,13 @@ void AddressClient::processRequest(){
     }
 }
 
-bool AddressClient::findEnter() {
-    bool found = std::find(buffer_, buffer_ + already_read_, '\n') < buffer_ + already_read_;
+bool AddressClient::findStar() {
+    bool found = std::find(buffer_, buffer_ + already_read_, '*') < buffer_ + already_read_;
     return found;
 }
 
 std::string AddressClient::getmsg() {
-    std::size_t pos = std::find(buffer_, buffer_ + already_read_, '\n') - buffer_;
+    std::size_t pos = std::find(buffer_, buffer_ + already_read_, '*') - buffer_;
     // getting message from client
     std::string msg(buffer_, pos); 
     std::cout << "msg: " << msg << "\n";
@@ -226,7 +226,6 @@ void acceptClients() {
     using namespace boost::asio;
     ip::tcp::acceptor acceptor(service, ip::tcp::endpoint(ip::tcp::v4(), 8001));
     std::cout << "entered accept\n";
-    // int serverSize = 1;
     while (true) { 
         AddressClient_ptr new_( new AddressClient);
         acceptor.accept(new_->get_socket());
@@ -240,7 +239,6 @@ void acceptClients() {
 
 void handleClients(){
     bool areopen = true;
-    std::cout << "entered handleclients\n";
     while (areopen) {
         boost::recursive_mutex::scoped_lock lk(clients_mtx);
         if(clients.size()!= 0){

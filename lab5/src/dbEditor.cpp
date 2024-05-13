@@ -48,14 +48,17 @@ int dbEditor::choose(const Record& in){
         return 0;
     }
 
-    std::string query = "SELECT id_card FROM patients WHERE snils LIKE" + in[0];  
+    std::string query = "SELECT id_card FROM patients WHERE snils LIKE '" 
+                        + in[0] + "';";  
     Records records = select_stmt(query, 1);
 
     if(records.size() != 1){ // if number of returned rows != 1
         return 0;
-    } else {
-
-        if (!records[0].empty()) return std::stoi(records[0][0]);
+    } 
+    else{
+        if (!records[0].empty()){
+            return std::stoi(records[0][0]);
+        }
         else {
             std::cout << "\n\nerror(?) 1: empty result after choose??\n\n"; 
             return 0;
@@ -65,7 +68,7 @@ int dbEditor::choose(const Record& in){
 
 Records dbEditor::view_info(int card_id){
     std::string query = "SELECT * FROM patients WHERE id_card = " 
-                        + std::to_string(card_id);  
+                        + std::to_string(card_id) + ";";  
 
     Records records = select_stmt(query, 0);
 

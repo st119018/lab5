@@ -37,7 +37,7 @@ private:
     
     void write(const std::string& ans);
     
-    bool findEnter();
+    bool findStar();
 
     void beautify_msg();
 

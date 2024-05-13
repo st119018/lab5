@@ -70,7 +70,7 @@ private:
         std::cout << "\nWrite your password: ";
         std::cin >> p;
 
-        write(l + p + "*");
+        write(l + " " + p + "*");
     }    
 
     void choose(){
