@@ -167,13 +167,13 @@ void AddressClient::add_record(){
 
     if(full_str_.empty()){
         // extract 
-        std::size_t pos = last_msg_.find('|');
-        for (int i= 0; i < 4; ++i){
+        std::size_t pos = last_msg_.find("|");
+        for (int i= 0; i < 5; ++i){
             std::size_t prev_pos = ++pos;
-            std::size_t pos = last_msg_.find('|', prev_pos);
+            pos = last_msg_.find('|', prev_pos);
             full_str_.push_back(last_msg_.substr(prev_pos, pos - prev_pos));
         }
-        full_str_.push_back(last_msg_.substr(pos));
+        full_str_.push_back(last_msg_.substr(pos + 1));
 
         write("The following record for card №" + std::to_string(card_id_) + 
               " will be added; type y/n to add/delete: \n");
