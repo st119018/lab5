@@ -33,8 +33,9 @@ struct AddessServer {
         // quit logout
         std::cout << "\nStart by 'login' and 'choose'\n";
         while ( started_) {
-            get_request();
-            read_answer();
+            if (get_request()){
+                read_answer();
+            }
             
         }
     }
@@ -43,31 +44,32 @@ private:
     bool get_request() {
         std::string request;
         std::cout << "\nYour input: ";
-        std::cin >> request;
         
+        getline(std::cin, request);
         if(request == "login") {
             login();
             return 1;
         }
-        else if(request == "choose") {
+        if(request == "choose") {
             choose();
             return 1;
         }
-        else if(request == "info") {
+        if(request == "info") {
             get_info();
             return 1;
         }
-        else if(request == "add") {
+        if(request == "add") {
             add_record();
             return 1;
         }
-        else if(request == "view") {
+        if(request == "view") {
             view_record();
             return 1;
         }
-        else {
-            return 0;
+        if(request == "quit"){
+            write("quit*");
         }
+        return 0;
     }
 
     void login(){

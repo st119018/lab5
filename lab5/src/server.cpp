@@ -4,8 +4,12 @@
 #include <iostream>
 
 
-boost::asio::ip::tcp::socket & AddressClient::get_socket(){ 
+boost::asio::ip::tcp::socket& AddressClient::get_socket(){ 
     return sock_; 
+}
+
+bool AddressClient::get_started(){
+    return started_;
 }
 
 void AddressClient::answer(){
@@ -32,7 +36,9 @@ void AddressClient::processRequest(){
     
     last_msg_ = getmsg();
 
-// quit logout
+    if(last_msg_.find("quit") == 0){
+        quit();
+    }
 
     switch(state_)
     {
@@ -70,11 +76,8 @@ void AddressClient::processRequest(){
             
         default:
             std::cout << "Error: wrong state!!!\n";
-            state_ = 0;
-            card_id_ = 0;
-            user_id_ = 0;
-            write("Smth went wrong on server side.\n "
-                  "You are being logged out; enter 'login' to start again*");      
+            full_str_.clear();
+            write("Smth went wrong on server side; try again*");      
     }
 }
 
@@ -108,20 +111,19 @@ void AddressClient::login(){
         state_ = 1;
     }
     else{
-        full_str_.clear();
-        field_num_ = 0;
         write("Wrong login or password; enter 'login' and try again\n*");
+        full_str_.clear();
         state_ = 0;
     }
     
 }
 
-void AddressClient::beautify_msg(){
-    if(last_msg_.find("\n") == last_msg_.size() - 1){
-        last_msg_.erase(last_msg_.size() - 1);
-    }
+// void AddressClient::beautify_msg(){
+//     if(last_msg_.find("\n") == last_msg_.size() - 1){
+//         last_msg_.erase(last_msg_.size() - 1);
+//     }
 
-}
+// }
 
 void AddressClient::choose_patient(){
     std::stringstream msg{last_msg_};
@@ -153,7 +155,6 @@ void AddressClient::view_patient(){
                 ans += rec + "\n";
             }
             full_str_.clear();
-            field_num_ = 0;
             write(ans + "*");
             state_= 4;
             return;
@@ -178,7 +179,7 @@ void AddressClient::add_record(){
         write("The following record for card №" + std::to_string(card_id_) + 
               " will be added; type y/n to add/delete: \n");
         for(auto str : full_str_){
-            write(str + "\n\n");
+            write(str + "\n");
         }
         write("*");
         return;
@@ -222,6 +223,11 @@ void AddressClient::view_record(){
     }
 }
 
+void AddressClient::quit(){
+    started_ = 0;
+    write("You are disconnected*");
+}
+
 void AddressClient::write(const std::string& ans) {
     sock_.write_some(boost::asio::buffer(ans));
 }
@@ -246,7 +252,7 @@ void handleClients(){
         if(clients.size()!= 0){
             for ( std::vector<AddressClient_ptr>::iterator b = clients.begin(), e = clients.end(); b != e; ++b){
                 (*b)->answer();
-                if ((*b)->getst() == -1){
+                if ((*b)->get_started() == -1){
                     clients.erase(b);
                 }
             }

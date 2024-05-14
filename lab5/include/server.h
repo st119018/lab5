@@ -29,17 +29,16 @@ private:
     char buffer_ [bufferSize];
     bool started_;    
     int state_;
-    int field_num_;
     int card_id_;
     int user_id_;
-    std::vector <std::string> full_str_;
+    Record full_str_;
     std::string last_msg_;
     
     void write(const std::string& ans);
     
     bool findStar();
 
-    void beautify_msg();
+    // void beautify_msg();
 
     void processRequest();
 
@@ -55,16 +54,16 @@ private:
 
     void view_patient();
 
+    void quit();
+
 public:
-    AddressClient(): sock_(service), started_(false), already_read_(0), state_(0), field_num_(0) {};
+    AddressClient(): sock_(service), started_(true), already_read_(0), state_(0) {};
 
     void answer();
 
     boost::asio::ip::tcp::socket & get_socket(); 
 
-    bool getst(){
-        return started_;
-    }       
+    bool get_started();
 
 };
 
