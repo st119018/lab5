@@ -55,8 +55,6 @@ private:
 
     void view_patient();
 
-    bool isDate(std::string date);
-
 public:
     AddressClient(): sock_(service), started_(false), already_read_(0), state_(0), field_num_(0) {};
 

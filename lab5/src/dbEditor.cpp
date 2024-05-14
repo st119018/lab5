@@ -43,7 +43,7 @@ int dbEditor::login(const Record& in) {
 
 // finds given patient' card id; returns 0 if not found
 int dbEditor::choose(const Record& in){
-    if(in.size() != 1) {
+    if(in.size() != 1){
         std::cout << "\nError(db): wrong number in vector\n";
         return 0;
     }
@@ -70,7 +70,7 @@ Records dbEditor::view_info(int card_id){
     std::string query = "SELECT * FROM patients WHERE id_card = " 
                         + std::to_string(card_id) + ";";  
 
-    Records records = select_stmt(query, 0);
+    Records records = select_stmt(query, 0);//////////////// query. 0 or 1??
 
     return records;
 }
@@ -97,6 +97,26 @@ bool dbEditor::add_record(int id_card, const Record& in){
 
 }
 
+Records dbEditor::view_records(Record in, int card_id){
+    Records records;
+    
+    if(in.size() == 2){
+        std::string query;
+        if(in[0] == "all"){
+            query = "SELECT exam_date, complaints, observation, consultion, "
+            "medication, doctor FROM records WHERE id_card = " + 
+            std::to_string(card_id) + ";";
+        }
+        else{
+            query = "SELECT exam_date, complaints, observation, consultion, "
+            "medication, doctor FROM records WHERE id_card = " + std::to_string(card_id) + 
+            "AND exam_date > '" + in[0] + "' AND exam_date < '" + in[1] + "';";
+        }
+        records = select_stmt(query, 0);
+    }
+    return records;
+}
+
 static int callback(void* data, int argc, char** argv, char** azColName){
     Records* records = static_cast<Records*>(data);
     try {
@@ -116,8 +136,8 @@ static int callbackv2(void* data, int argc, char** argv, char** azColName){
         for(int i = 0; i < argc; ++i){
             std::string st = std::string(azColName[i]);
             st += ": ";
-            st += argv[i] ? argv[i] : "unknown";
-            record.push_back(st);
+            st += argv[i] ? argv[i] : "-";
+            record[i] = st;
         }
         records->emplace_back(record);
     }

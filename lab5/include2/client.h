@@ -7,6 +7,14 @@
 using namespace boost::asio;
 io_service service;
 
+inline bool isInteger(const std::string & s) {
+    if(s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+'))){
+       return false;
+    }
+    char * p;
+    strtol(s.c_str(), &p, 10);
+    return (*p == 0);
+}
 
 struct AddessServer {
     AddessServer() 
@@ -54,8 +62,8 @@ private:
             return 1;
         }
         else if(request == "view") {
-             view_record();
-             return 1;
+            view_record();
+            return 1;
         }
         else {
             return 0;
@@ -89,7 +97,11 @@ private:
         write("add|");
         std::string s;
         std::cout << "\nWrite date as YYYY-MM-DD: ";
-        std::cin >> s;
+        getline(std::cin, s);
+        while(!isDate(s)){
+            std::cout << "\nWrong format. Write again:";
+            std::cin >> s;
+        }
         write(s + "|");
         std::cout << "\nWrite complaints of patient "
                      "(or write '-' if no complaints) and press enter: \n";
@@ -116,8 +128,29 @@ private:
     }
 
     void view_record(){
-        // write("view ");
-        // std::cout << "Write ...";
+        write("view ");
+        std::string s;
+        std::cout << "View all records(type y/n): ";
+        std::cin >> s;
+        if(s == "y"){
+            write("all*");
+        }
+        else{
+            std::cout << "Write period\nStart date(YYYY-MM-DD): ";
+            std::cin >> s;
+            while(!isDate(s)){
+                std::cout << "\nWrong format. Write again: ";
+                std::cin >> s;
+            }
+            write(s + " ");
+            std::cout << "\nEnd date: ";
+            std::cin >> s;
+            while(!isDate(s)){
+                std::cout << "\nWrong format. Write again: ";
+                std::cin >> s;
+            }
+            write(s + "*");
+        }
     }
 
 
@@ -138,20 +171,31 @@ private:
         return found;
     }
 
-    std::string getmsg(){
-    
-    std::size_t pos = std::find(buff_, buff_ + already_read_, '*') - buff_;
-    // getting message
-    std::string msg(buff_, pos); 
-    // deleting messege from buffer
-    std::copy(buff_ + already_read_, buff_ + buffSize_, buff_); 
-    already_read_ -= pos + 1;
+    std::string getmsg(){   
+        std::size_t pos = std::find(buff_, buff_ + already_read_, '*') - buff_;
+        // getting message
+        std::string msg(buff_, pos); 
+        // deleting messege from buffer
+        std::copy(buff_ + already_read_, buff_ + buffSize_, buff_); 
+        already_read_ -= pos + 1;
 
-    return msg;
-}
+        return msg;
+    }
 
     void write(const std::string & msg) {
         sock_.write_some(buffer(msg));
+    }
+    
+    // check format of date
+    bool isDate(std::string date) {
+        if (date.size() != 10) return 0;
+        if (isInteger(date.substr(0, 4)) &&
+            isInteger(date.substr(5, 2)) && 
+            isInteger(date.substr(8, 2)) &&
+            date[4] == '-' && date[7] == '-') {
+            return 1;
+        } 
+        else return 0;
     }
 
 private:
@@ -174,3 +218,4 @@ void run_client() {
         std::cout << "Error client terminated: " << err.what() << std::endl;
     }
 }
+

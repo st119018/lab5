@@ -32,8 +32,10 @@ class dbEditor{
 
     bool add_record(int id_card, const Record& in);
 
-    ~dbEditor(){
+    Records view_records(Record in, int card_id);
 
+    ~dbEditor(){
+        sqlite3_close(db_);
     }
 
 };

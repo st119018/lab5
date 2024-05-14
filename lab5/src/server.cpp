@@ -59,7 +59,7 @@ void AddressClient::processRequest(){
                 add_record();
             }
             else if(last_msg_.find("view") == 0) {
-                // view_record();
+                view_record();
             }
             else write("You can enter only 'info', 'add' or 'view'; try again*");
             break;
@@ -137,7 +137,7 @@ void AddressClient::choose_patient(){
     } 
     else {
         full_str_.clear();
-        write("Patient is not chosen; enter 'choose' and try again*");
+        write("Patient is not found; enter 'choose' and try again*");
     }
 
 }
@@ -154,12 +154,12 @@ void AddressClient::view_patient(){
             }
             full_str_.clear();
             field_num_ = 0;
-            write(ans);
+            write(ans + "*");
             state_= 4;
             return;
         }
     }
-    write("smth went wrong; data not found :(*");
+    write("Smth went wrong; data not found*");
     
 }
 
@@ -174,11 +174,6 @@ void AddressClient::add_record(){
             full_str_.push_back(last_msg_.substr(prev_pos, pos - prev_pos));
         }
         full_str_.push_back(last_msg_.substr(pos));
-
-        if(!isDate(full_str_[0])){
-            state_ = 2;
-            write("Date format is wrong; enter 'add' to make new record*");
-        }
 
         write("The following record for card №" + std::to_string(card_id_) + 
               " will be added; type y/n to add/delete: \n");
@@ -203,29 +198,37 @@ void AddressClient::add_record(){
     }
 }
 
+void AddressClient::view_record(){
+    std::stringstream msg{last_msg_};
+    msg >> last_msg_ >> last_msg_;
+    full_str_.push_back(last_msg_);
+    msg >> last_msg_;
+    full_str_.push_back(last_msg_);
+    
+    Records records = editor.view_records(full_str_, card_id_);
+    if (!records.empty()){
+        std::string ans{};
+        for(auto recs: records){
+            for (auto rec : recs){
+                ans += rec + "\n";
+            }
+            ans += "__________\n";
+        }
+        full_str_.clear();
+        write(ans + "*");
+    } 
+    else{
+        write("Records not found*");
+    }
+}
 
 void AddressClient::write(const std::string& ans) {
-        sock_.write_some(boost::asio::buffer(ans));
+    sock_.write_some(boost::asio::buffer(ans));
 }
-
-// check format of date
-bool AddressClient::isDate(std::string date) {
-    if (date.size() != 10) return 0;
-    if (isInteger(date.substr(0, 4)) &&
-        isInteger(date.substr(5, 2)) && 
-        isInteger(date.substr(8, 2)) &&
-        date[4] == '-' && date[7] == '-') {
-            return 1;
-    } 
-    else return 0;
-}
-
-
 
 void acceptClients() {
     using namespace boost::asio;
     ip::tcp::acceptor acceptor(service, ip::tcp::endpoint(ip::tcp::v4(), 8001));
-    std::cout << "entered accept\n";
     while (true) { 
         AddressClient_ptr new_( new AddressClient);
         acceptor.accept(new_->get_socket());
@@ -235,7 +238,6 @@ void acceptClients() {
         clients.push_back(new_);
     }
 }
-
 
 void handleClients(){
     bool areopen = true;
@@ -250,14 +252,4 @@ void handleClients(){
             }
         }
     }
-}
-
-
-inline bool isInteger(const std::string & s) {
-    if(s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+'))){
-       return false;
-    }
-    char * p;
-    strtol(s.c_str(), &p, 10);
-    return (*p == 0);
 }
