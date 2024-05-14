@@ -38,8 +38,6 @@ private:
     
     bool findStar();
 
-    // void beautify_msg();
-
     void processRequest();
 
     std::string getmsg();

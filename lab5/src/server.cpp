@@ -103,8 +103,10 @@ void AddressClient::login(){
     full_str_.push_back(last_msg_);
     msg >> last_msg_;
     full_str_.push_back(last_msg_);
-
-    user_id_ = editor.login(full_str_);
+    {
+        boost::recursive_mutex::scoped_lock lk(db_mtx);
+        user_id_ = editor.login(full_str_);
+    }
     if(user_id_ != 0){
         write("You are logged in. Write 'choose' to choose patient\n*");
         full_str_.clear();
@@ -118,19 +120,15 @@ void AddressClient::login(){
     
 }
 
-// void AddressClient::beautify_msg(){
-//     if(last_msg_.find("\n") == last_msg_.size() - 1){
-//         last_msg_.erase(last_msg_.size() - 1);
-//     }
-
-// }
-
 void AddressClient::choose_patient(){
     std::stringstream msg{last_msg_};
     msg >> last_msg_ >> last_msg_;
     full_str_.push_back(last_msg_);
-
-    card_id_ = editor.choose(full_str_);
+    
+    {
+        boost::recursive_mutex::scoped_lock lk(db_mtx);
+        card_id_ = editor.choose(full_str_);
+    }
         
     if (card_id_ != 0){
         write("Patient is chosen. Write 'info', 'add' or 'view'*");
@@ -145,8 +143,11 @@ void AddressClient::choose_patient(){
 }
 
 void AddressClient::view_patient(){
-    // mutex
-    Records records = editor.view_info(card_id_);
+    Records records;
+    {
+        boost::recursive_mutex::scoped_lock lk(db_mtx);
+        records = editor.view_info(card_id_);
+    }
 
     if(!records.empty()){
         if(!records[0].empty()){
@@ -165,7 +166,6 @@ void AddressClient::view_patient(){
 }
 
 void AddressClient::add_record(){
-
     if(full_str_.empty()){
         // extract 
         std::size_t pos = last_msg_.find("|");
@@ -186,7 +186,11 @@ void AddressClient::add_record(){
     }
     else{
         if (last_msg_[0] == 'y' or last_msg_[0] == 'Y'){
-            editor.add_record(card_id_, full_str_);
+            {
+                boost::recursive_mutex::scoped_lock lk(db_mtx);
+                editor.add_record(card_id_, full_str_);
+            }
+            
             state_ = 2;
             full_str_.clear();
             write("Record was added*");
@@ -205,15 +209,20 @@ void AddressClient::view_record(){
     full_str_.push_back(last_msg_);
     msg >> last_msg_;
     full_str_.push_back(last_msg_);
-    
-    Records records = editor.view_records(full_str_, card_id_);
+
+    Records records;
+    {
+        boost::recursive_mutex::scoped_lock lk(db_mtx);
+        records = editor.view_records(full_str_, card_id_);
+    }
+
     if (!records.empty()){
         std::string ans{};
         for(auto recs: records){
             for (auto rec : recs){
                 ans += rec + "\n";
             }
-            ans += "__________\n";
+            ans += "-----------------------\n";
         }
         full_str_.clear();
         write(ans + "*");
@@ -236,7 +245,7 @@ void acceptClients() {
     using namespace boost::asio;
     ip::tcp::acceptor acceptor(service, ip::tcp::endpoint(ip::tcp::v4(), 8001));
     while (true) { 
-        AddressClient_ptr new_( new AddressClient);
+        AddressClient_ptr new_(new AddressClient);
         acceptor.accept(new_->get_socket());
         std::cout << "Accepted\n";
         
@@ -246,13 +255,12 @@ void acceptClients() {
 }
 
 void handleClients(){
-    bool areopen = true;
-    while (areopen) {
+    while (true) {
         boost::recursive_mutex::scoped_lock lk(clients_mtx);
-        if(clients.size()!= 0){
-            for ( std::vector<AddressClient_ptr>::iterator b = clients.begin(), e = clients.end(); b != e; ++b){
+        if(clients.size() != 0){
+            for (std::vector<AddressClient_ptr>::iterator b = clients.begin(), e = clients.end(); b != e; ++b){
                 (*b)->answer();
-                if ((*b)->get_started() == -1){
+                if ((*b)->get_started() == 0){
                     clients.erase(b);
                 }
             }
