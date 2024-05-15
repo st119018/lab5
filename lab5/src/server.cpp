@@ -7,6 +7,7 @@ dbEditor editor;
 boost::asio::io_service service;
 std::vector<AddressClient_ptr> clients;
 boost::recursive_mutex clients_mtx;
+boost::recursive_mutex db_mtx;
 
 boost::asio::ip::tcp::socket& AddressClient::get_socket(){ 
     return sock_; 

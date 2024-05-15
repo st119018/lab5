@@ -7,8 +7,6 @@
 #include <vector>
 #include <string>
 
-static boost::recursive_mutex db_mtx;
-
 using Record = std::vector<std::string>;
 using Records = std::vector<Record>;
 

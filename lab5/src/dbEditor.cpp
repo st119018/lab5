@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+
 dbEditor::dbEditor(){
     int rc = sqlite3_open("../sqlite.db", &db_);
 
@@ -11,7 +12,7 @@ dbEditor::dbEditor(){
         sqlite3_close(db_);
     } 
     else {
-        std::cout << "Opened database successfully\n";
+        std::cout << "Opened database successfully?\n";
         opened_ = true;
     }
 }
@@ -70,7 +71,7 @@ Records dbEditor::view_info(int card_id){
     std::string query = "SELECT * FROM patients WHERE id_card = " 
                         + std::to_string(card_id) + ";";  
 
-    Records records = select_stmt(query, 0);//////////////// query. 0 or 1??
+    Records records = select_stmt(query, 0);/////////////////
 
     return records;
 }

@@ -24,52 +24,57 @@ struct AddessServer {
         sock_.connect(ep);
     }
 
+    void close(){
+        sock_.close();
+    }
+
     void loop() {
         std::cout << "Write:\n    'login' to login "
         "\n    'choose' to choose a patient"
         "\n    'info' to get all info of chosen patient"
         "\n    'add' to add new record to chosen patient's card"
-        "\n    'view' to view records of chosen patient's card";
-        // quit logout
+        "\n    'view' to view records of chosen patient's card"
+        "\n    'quit' to disconnect from server";
+        
         std::cout << "\nStart by 'login' and 'choose'\n";
-        while ( started_) {
-            if (get_request()){
-                read_answer();
-            }
-            
+        while (started_) {
+            get_request(); 
+            read_answer();
         }
     }
     
 private:
-    bool get_request() {
+    void get_request() {
         std::string request;
         std::cout << "\nYour input: ";
-        
         getline(std::cin, request);
+
         if(request == "login") {
             login();
-            return 1;
+            return;
         }
         if(request == "choose") {
             choose();
-            return 1;
+            return;
         }
         if(request == "info") {
             get_info();
-            return 1;
+            return;
         }
         if(request == "add") {
             add_record();
-            return 1;
+            return;
         }
         if(request == "view") {
             view_record();
-            return 1;
+            return;
         }
         if(request == "quit"){
             write("quit*");
+            started_ = 0;
+            return;
         }
-        return 0;
+        write("unknown*");
     }
 
     void login(){
@@ -155,7 +160,6 @@ private:
         }
     }
 
-
     void read_answer() {
         already_read_ = 0;
         while(!findStar()){
@@ -214,8 +218,9 @@ void run_client() {
     AddessServer client;
     try {
         client.connect(ep);
-        std::cout<< "Connected to server\n";
+        std::cout << "Connected to server\n";
         client.loop();
+        client.close();
     } catch(boost::system::system_error & err) {
         std::cout << "Error client terminated: " << err.what() << std::endl;
     }
