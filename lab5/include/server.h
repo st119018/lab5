@@ -10,16 +10,10 @@
 
 #include "dbEditor.h"
 
-
-static dbEditor editor;
-
-static boost::asio::io_service service;
+extern boost::asio::io_service service;
 
 class AddressClient;
 typedef boost::shared_ptr<AddressClient> AddressClient_ptr;
-
-static std::vector<AddressClient_ptr> clients;
-static boost::recursive_mutex clients_mtx;
 
 class AddressClient : public boost::enable_shared_from_this<AddressClient> {
 private:
@@ -62,6 +56,10 @@ public:
     boost::asio::ip::tcp::socket & get_socket(); 
 
     bool get_started();
+
+    ~AddressClient(){
+        sock_.close();
+    }
 
 };
 

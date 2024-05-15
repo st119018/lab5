@@ -3,6 +3,10 @@
 #include <string>
 #include <iostream>
 
+dbEditor editor;
+boost::asio::io_service service;
+std::vector<AddressClient_ptr> clients;
+boost::recursive_mutex clients_mtx;
 
 boost::asio::ip::tcp::socket& AddressClient::get_socket(){ 
     return sock_; 
@@ -12,7 +16,8 @@ bool AddressClient::get_started(){
     return started_;
 }
 
-void AddressClient::answer(){
+void AddressClient::answer()
+{
     try {
         if ( sock_.available()){
         already_read_ += sock_.read_some(boost::asio::buffer(buffer_ + already_read_, bufferSize - already_read_));
@@ -38,6 +43,7 @@ void AddressClient::processRequest(){
 
     if(last_msg_.find("quit") == 0){
         quit();
+        return;
     }
 
     switch(state_)
@@ -161,13 +167,13 @@ void AddressClient::view_patient(){
             return;
         }
     }
-    write("Smth went wrong; data not found*");
+    write("Data not found; try again*");
     
 }
 
 void AddressClient::add_record(){
     if(full_str_.empty()){
-        // extract 
+        // extracting substrings from client's message
         std::size_t pos = last_msg_.find("|");
         for (int i= 0; i < 5; ++i){
             std::size_t prev_pos = ++pos;
@@ -177,7 +183,7 @@ void AddressClient::add_record(){
         full_str_.push_back(last_msg_.substr(pos + 1));
 
         write("The following record for card №" + std::to_string(card_id_) + 
-              " will be added; type y/n to add/delete: \n");
+              " will be added; type y/n to add/delete it: \n");
         for(auto str : full_str_){
             write(str + "\n");
         }
@@ -186,14 +192,20 @@ void AddressClient::add_record(){
     }
     else{
         if (last_msg_[0] == 'y' or last_msg_[0] == 'Y'){
+            bool isAdded;
             {
                 boost::recursive_mutex::scoped_lock lk(db_mtx);
-                editor.add_record(card_id_, full_str_);
+                isAdded = editor.add_record(card_id_, full_str_);
             }
             
             state_ = 2;
             full_str_.clear();
-            write("Record was added*");
+            if(isAdded){
+                write("Record was added*");
+            } else{
+                write("Smth went wrong; record wasn't added*");
+            }
+            
         } 
         else{
             state_ = 2;
@@ -222,6 +234,7 @@ void AddressClient::view_record(){
             for (auto rec : recs){
                 ans += rec + "\n";
             }
+            // separate records
             ans += "-----------------------\n";
         }
         full_str_.clear();
@@ -260,6 +273,7 @@ void handleClients(){
         if(clients.size() != 0){
             for (std::vector<AddressClient_ptr>::iterator b = clients.begin(), e = clients.end(); b != e; ++b){
                 (*b)->answer();
+                // deleting 
                 if ((*b)->get_started() == 0){
                     clients.erase(b);
                 }
