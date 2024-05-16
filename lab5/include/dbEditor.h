@@ -16,6 +16,7 @@ class dbEditor{
     private:
     sqlite3* db_;
     bool opened_;
+    boost::recursive_mutex db_mtx;
 
     Records select_stmt(const std::string& stmt, bool flag);
 

@@ -6,7 +6,6 @@
 dbEditor editor;
 boost::asio::io_service service;
 std::vector<AddressClient_ptr> clients;
-boost::recursive_mutex db_mtx;
 
 boost::asio::ip::tcp::socket& AddressClient::get_socket(){ 
     return sock_; 
@@ -119,10 +118,9 @@ void AddressClient::login(){
     full_str_.push_back(last_msg_);
     msg >> last_msg_;
     full_str_.push_back(last_msg_);
-    {
-        boost::recursive_mutex::scoped_lock lk(db_mtx);
-        user_id_ = editor.login(full_str_);
-    }
+    
+    user_id_ = editor.login(full_str_);
+    
     if(user_id_ != 0){
         write("You are logged in. Write 'choose' to choose patient\n*");
         full_str_.clear();
@@ -141,10 +139,8 @@ void AddressClient::choose_patient(){
     msg >> last_msg_ >> last_msg_;
     full_str_.push_back(last_msg_);
     
-    {
-        boost::recursive_mutex::scoped_lock lk(db_mtx);
-        card_id_ = editor.choose(full_str_);
-    }
+    card_id_ = editor.choose(full_str_);
+    
         
     if (card_id_ != 0){
         write("Patient is chosen. Write 'info', 'add' or 'view'*");
@@ -159,12 +155,8 @@ void AddressClient::choose_patient(){
 }
 
 void AddressClient::view_patient(){
-    Records records;
-    {
-        boost::recursive_mutex::scoped_lock lk(db_mtx);
-        records = editor.view_info(card_id_);
-    }
-
+    Records records = editor.view_info(card_id_);
+    
     if(!records.empty()){
         if(!records[0].empty()){
             std::string ans{};
@@ -201,12 +193,8 @@ void AddressClient::add_record(){
         return;
     }
     else{
-        if (last_msg_[0] == 'y' or last_msg_[0] == 'Y'){
-            bool isAdded;
-            {
-                boost::recursive_mutex::scoped_lock lk(db_mtx);
-                isAdded = editor.add_record(card_id_, full_str_);
-            }
+        if (last_msg_[0] == 'y' or last_msg_[0] == 'Y'){            
+            bool isAdded = editor.add_record(card_id_, full_str_);
             
             state_ = 2;
             full_str_.clear();
@@ -232,11 +220,7 @@ void AddressClient::view_record(){
     msg >> last_msg_;
     full_str_.push_back(last_msg_);
 
-    Records records;
-    {
-        boost::recursive_mutex::scoped_lock lk(db_mtx);
-        records = editor.view_records(full_str_, card_id_);
-    }
+    Records records = editor.view_records(full_str_, card_id_);
 
     if (!records.empty()){
         std::string ans{};
