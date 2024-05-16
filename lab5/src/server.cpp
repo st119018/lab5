@@ -122,12 +122,12 @@ void AddressClient::login(){
     user_id_ = editor.login(full_str_);
     
     if(user_id_ != 0){
-        write("You are logged in. Write 'choose' to choose patient\n*");
+        write("You are logged in. Write 'choose' to choose patient*");
         full_str_.clear();
         state_ = 1;
     }
     else{
-        write("Wrong login or password; enter 'login' and try again\n*");
+        write("Wrong login or password; enter 'login' and try again*");
         full_str_.clear();
         state_ = 0;
     }
@@ -165,7 +165,7 @@ void AddressClient::view_patient(){
             }
             full_str_.clear();
             write(ans + "*");
-            state_= 4;
+            state_= 2;
             return;
         }
     }
@@ -235,6 +235,7 @@ void AddressClient::view_record(){
         write(ans + "*");
     } 
     else{
+        full_str_.clear();
         write("Records not found*");
     }
 }

@@ -114,7 +114,7 @@ Records dbEditor::view_records(Record in, int card_id){
         else{
             query = "SELECT exam_date, complaints, observation, consultion, "
             "medication, doctor FROM records WHERE id_card = " + std::to_string(card_id) + 
-            "AND exam_date > '" + in[0] + "' AND exam_date < '" + in[1] + "' ORDER BY exam_date DESC;";
+            " AND exam_date > '" + in[0] + "' AND exam_date < '" + in[1] + "' ORDER BY exam_date DESC;";
         }
         records = select_stmt(query, 0);
     }

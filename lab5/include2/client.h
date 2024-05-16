@@ -81,10 +81,8 @@ private:
         write("login ");
         std::cout << "Write your login: ";
         std::string l, p;
-        // std::cin >> l;
         getline(std::cin, l);
-        std::cout << "\nWrite your password: ";
-        // std::cin >> p;
+        std::cout << "Write your password: ";
         getline(std::cin, p);
 
         write(l + " " + p + "*");
@@ -92,9 +90,8 @@ private:
 
     void choose(){
         write("choose ");
-        std::cout << "\nWrite SNILS of patient to be chosen without spaces: ";
+        std::cout << "Write SNILS of patient to be chosen without spaces: ";
         std::string s;
-        // std::cin >> s;
         getline(std::cin, s);
         write(s + "*");
     }
@@ -106,34 +103,33 @@ private:
     void add_record(){
         write("add|");
         std::string s;
-        std::cout << "\nWrite date as YYYY-MM-DD: ";
+        std::cout << "Write date as YYYY-MM-DD: ";
         getline(std::cin, s);
         while(!isDate(s)){
-            std::cout << "\nWrong format. Write again:";
+            std::cout << "Wrong format. Write again:";
             getline(std::cin, s);
         }
         write(s + "|");
-        std::cout << "\nWrite complaints of patient "
+        std::cout << "Write complaints of patient "
                      "(or write '-' if no complaints) and press enter: \n";
         getline(std::cin, s);
         write(s + "|");
-        std::cout << "\nWrite observation of patient "
+        std::cout << "Write observation of patient "
                      "(or write '-' if no observation) and press enter: \n";
         getline(std::cin, s);
         write (s + "|");
-        std::cout << "\nWrite consultion for patient "
+        std::cout << "Write consultion for patient "
                      "(or write '-' if no consultion) and press enter: \n";
         getline(std::cin, s);
         write(s + "|");
-        std::cout << "\nWrite prescribed medication for patient "
+        std::cout << "Write prescribed medication for patient "
                      "(or write '-' if no medication) and press enter: \n";
         getline(std::cin, s);
         write(s + "|");
-        std::cout << "\nWrite doctor's name (or write '-') and press enter:\n";
+        std::cout << "Write doctor's name (or write '-') and press enter:\n";
         getline(std::cin, s);
         write(s + "*");
         read_answer();
-        // std::cin >> s;
         std::cout << "Your input: ";
         getline(std::cin, s);
         write(s + "*");
@@ -143,27 +139,22 @@ private:
         write("view ");
         std::string s;
         std::cout << "View all records(type y/n): ";
-        // std::cin >> s;
         getline(std::cin, s);
         if(s == "y"){
             write("all*");
         }
         else{
             std::cout << "Write period\nStart date(YYYY-MM-DD): ";
-            // std::cin >> s;
             getline(std::cin, s);
             while(!isDate(s)){
-                std::cout << "\nWrong format. Write again: ";
-                // std::cin >> s;
+                std::cout << "Wrong format. Write again: ";
                 getline(std::cin, s);
             }
             write(s + " ");
-            std::cout << "\nEnd date: ";
-            // std::cin >> s;
+            std::cout << "End date: ";
             getline(std::cin, s);
             while(!isDate(s)){
-                std::cout << "\nWrong format. Write again: ";
-                // std::cin >> s;
+                std::cout << "Wrong format. Write again: ";
                 getline(std::cin, s);
             }
             write(s + "*");
