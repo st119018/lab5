@@ -7,6 +7,7 @@
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/signals2/mutex.hpp>
 
 #include "dbEditor.h"
 
@@ -21,7 +22,7 @@ private:
     enum { bufferSize = 1024 };
     int already_read_;
     char buffer_ [bufferSize];
-    bool started_;    
+    bool st_; 
     int state_;
     int card_id_;
     int user_id_;
@@ -48,18 +49,16 @@ private:
 
     void quit();
 
-public:
-    AddressClient(): sock_(service), started_(true), already_read_(0), state_(0) {};
-
     void answer();
 
-    boost::asio::ip::tcp::socket & get_socket(); 
+public:
+    AddressClient(): sock_(service), st_(1), already_read_(0), state_(0) {};
+    
+    void run();
 
-    bool get_started();
+    boost::asio::ip::tcp::socket& get_socket(); 
 
-    ~AddressClient(){
-        sock_.close();
-    }
+    ~AddressClient();
 
 };
 
@@ -67,6 +66,6 @@ inline bool isInteger(const std::string & s);
 
 void acceptClients();
 
-void handleClients();
+void run_client(AddressClient_ptr ptr);
 
 #endif // SERVER_H

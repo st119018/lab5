@@ -6,31 +6,36 @@
 dbEditor editor;
 boost::asio::io_service service;
 std::vector<AddressClient_ptr> clients;
-boost::recursive_mutex clients_mtx;
 boost::recursive_mutex db_mtx;
 
 boost::asio::ip::tcp::socket& AddressClient::get_socket(){ 
     return sock_; 
 }
 
-bool AddressClient::get_started(){
-    return started_;
+AddressClient::~AddressClient(){
+    sock_.close();
+}
+
+void AddressClient::run(){
+    while(st_){
+        answer();
+    }
 }
 
 void AddressClient::answer()
 {
     try {
-        if ( sock_.available()){
+        if (sock_.available()){
         already_read_ += sock_.read_some(boost::asio::buffer(buffer_ + already_read_, bufferSize - already_read_));
         }
         
         processRequest();
         
-    } catch ( boost::system::system_error& ) {
+    } catch (boost::system::system_error& ) {
         std::cerr << "Error answering\n";
         
         sock_.close();
-        started_ = false;
+        st_ = false;
     }
 }
 
@@ -74,7 +79,11 @@ void AddressClient::processRequest(){
             else if(last_msg_.find("view") == 0) {
                 view_record();
             }
-            else write("You can enter only 'info', 'add' or 'view'; try again*");
+            else if(last_msg_.find("choose") == 0) {
+                card_id_ = 0;
+                choose_patient();
+            }
+            else write("You can enter only 'info', 'add', 'view' or 'choose'; try again*");
             break;
         
         case 3:
@@ -247,8 +256,8 @@ void AddressClient::view_record(){
 }
 
 void AddressClient::quit(){
-    started_ = 0;
-    write("You are disconnected*");
+    write("You are disconnected\n*");
+    st_ = 0;
 }
 
 void AddressClient::write(const std::string& ans) {
@@ -263,22 +272,11 @@ void acceptClients() {
         acceptor.accept(new_->get_socket());
         std::cout << "Accepted\n";
         
-        boost::recursive_mutex::scoped_lock lk(clients_mtx);
-        clients.push_back(new_);
+        boost::thread th{run_client, new_};
+        th.detach();
     }
 }
 
-void handleClients(){
-    while (true) {
-        boost::recursive_mutex::scoped_lock lk(clients_mtx);
-        if(clients.size() != 0){
-            for (std::vector<AddressClient_ptr>::iterator b = clients.begin(), e = clients.end(); b != e; ++b){
-                (*b)->answer();
-                // deleting 
-                if ((*b)->get_started() == 0){
-                    clients.erase(b);
-                }
-            }
-        }
-    }
+void run_client(AddressClient_ptr ptr){
+    ptr->run();
 }
