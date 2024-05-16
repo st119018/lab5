@@ -81,9 +81,11 @@ private:
         write("login ");
         std::cout << "Write your login: ";
         std::string l, p;
-        std::cin >> l;
+        // std::cin >> l;
+        getline(std::cin, l);
         std::cout << "\nWrite your password: ";
-        std::cin >> p;
+        // std::cin >> p;
+        getline(std::cin, p);
 
         write(l + " " + p + "*");
     }    
@@ -92,7 +94,8 @@ private:
         write("choose ");
         std::cout << "\nWrite SNILS of patient to be chosen without spaces: ";
         std::string s;
-        std::cin >> s;
+        // std::cin >> s;
+        getline(std::cin, s);
         write(s + "*");
     }
 
@@ -107,7 +110,7 @@ private:
         getline(std::cin, s);
         while(!isDate(s)){
             std::cout << "\nWrong format. Write again:";
-            std::cin >> s;
+            getline(std::cin, s);
         }
         write(s + "|");
         std::cout << "\nWrite complaints of patient "
@@ -130,7 +133,9 @@ private:
         getline(std::cin, s);
         write(s + "*");
         read_answer();
-        std::cin >> s;
+        // std::cin >> s;
+        std::cout << "Your input: ";
+        getline(std::cin, s);
         write(s + "*");
     }
 
@@ -138,23 +143,28 @@ private:
         write("view ");
         std::string s;
         std::cout << "View all records(type y/n): ";
-        std::cin >> s;
+        // std::cin >> s;
+        getline(std::cin, s);
         if(s == "y"){
             write("all*");
         }
         else{
             std::cout << "Write period\nStart date(YYYY-MM-DD): ";
-            std::cin >> s;
+            // std::cin >> s;
+            getline(std::cin, s);
             while(!isDate(s)){
                 std::cout << "\nWrong format. Write again: ";
-                std::cin >> s;
+                // std::cin >> s;
+                getline(std::cin, s);
             }
             write(s + " ");
             std::cout << "\nEnd date: ";
-            std::cin >> s;
+            // std::cin >> s;
+            getline(std::cin, s);
             while(!isDate(s)){
                 std::cout << "\nWrong format. Write again: ";
-                std::cin >> s;
+                // std::cin >> s;
+                getline(std::cin, s);
             }
             write(s + "*");
         }
