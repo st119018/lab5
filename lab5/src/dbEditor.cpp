@@ -130,6 +130,10 @@ static int callback(void* data, int argc, char** argv, char** azColName){
         std::cout << "Exception: " << e.what() << "\n\n";
         return 1;
     }
+    catch (...){
+        std::cout << "Smth went wrong\n";
+        return 1;
+    }
     return 0;
 }
 
@@ -146,7 +150,11 @@ static int callbackv2(void* data, int argc, char** argv, char** azColName){
         records->emplace_back(record);
     }
     catch (std::exception const& e){
-        std::cout << "Exception: " << e.what() << "\n\n";
+        std::cerr << "Exception: " << e.what() << "\n\n";
+        return 1;
+    }
+    catch (...){
+        std::cerr << "Smth went wrong\n";
         return 1;
     }
     return 0;
@@ -167,7 +175,7 @@ Records dbEditor::select_stmt(const std::string& stmt, bool flag){
         sqlite3_free(errmsg);
     }
     else{
-        std::cerr << records.size() << " records returned successfully from select_stmt.\n";
+        std::cout << records.size() << " records returned successfully from select_stmt.\n";
     }
 
     return records;
