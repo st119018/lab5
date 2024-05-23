@@ -54,6 +54,8 @@ public:
     
     void run();
 
+    bool get_st() const;
+
     boost::asio::ip::tcp::socket& get_socket(); 
 
     ~AddressClient();
@@ -65,5 +67,7 @@ inline bool isInteger(const std::string & s);
 void acceptClients();
 
 void run_client(AddressClient_ptr ptr);
+
+void delClients();
 
 #endif // SERVER_H

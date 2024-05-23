@@ -6,6 +6,9 @@
 dbEditor editor;
 boost::asio::io_service service;
 std::vector<AddressClient_ptr> clients;
+boost::mutex cl_mtx;
+boost::condition_variable cv;
+bool changed{false};
 
 boost::asio::ip::tcp::socket& AddressClient::get_socket(){ 
     return sock_; 
@@ -19,6 +22,11 @@ void AddressClient::run(){
     while(st_){
         answer();
     }
+}
+
+bool AddressClient::get_st() const
+{
+    return st_;
 }
 
 void AddressClient::answer()
@@ -252,16 +260,36 @@ void AddressClient::write(const std::string& ans) {
 void acceptClients() {
     using namespace boost::asio;
     ip::tcp::acceptor acceptor(service, ip::tcp::endpoint(ip::tcp::v4(), 8001));
-    while (true) { 
+    while (true){ 
         AddressClient_ptr new_(new AddressClient);
         acceptor.accept(new_->get_socket());
         std::cout << "Accepted\n";
-        
         boost::thread th{run_client, new_};
         th.detach();
+        boost::lock_guard<boost::mutex> lk(cl_mtx);
+        clients.push_back(new_);
     }
 }
 
 void run_client(AddressClient_ptr ptr){
     ptr->run();
+    {
+        boost::lock_guard<boost::mutex> lk(cl_mtx);
+        changed = true;
+    }
+    cv.notify_one();
+}
+
+void delClients(){
+    while(true){
+        boost::unique_lock<boost::mutex> lk(cl_mtx);
+        cv.wait(lk, []{return changed;});
+
+        for(auto cl = clients.begin(), e = clients.end(); cl != e; ++cl){
+            if(!(*cl)->get_st()){
+                clients.erase(cl);
+            }
+        }
+        changed = false;
+    }
 }
