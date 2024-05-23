@@ -91,7 +91,7 @@ void AddressClient::processRequest(){
             
         default:
             std::cout << "Error: wrong state!!!\n";
-            full_str_.clear();
+            full_.clear();
             write("Smth went wrong on server side; try again*");      
     }
 }
@@ -115,20 +115,20 @@ std::string AddressClient::getmsg() {
 void AddressClient::login(){
     std::stringstream msg{last_msg_};
     msg >> last_msg_ >> last_msg_;
-    full_str_.push_back(last_msg_);
+    full_.push_back(last_msg_);
     msg >> last_msg_;
-    full_str_.push_back(last_msg_);
+    full_.push_back(last_msg_);
     
-    user_id_ = editor.login(full_str_);
+    user_id_ = editor.login(full_);
     
     if(user_id_ != 0){
         write("You are logged in. Write 'choose' to choose patient*");
-        full_str_.clear();
+        full_.clear();
         state_ = 1;
     }
     else{
         write("Wrong login or password; enter 'login' and try again*");
-        full_str_.clear();
+        full_.clear();
         state_ = 0;
     }
     
@@ -137,18 +137,18 @@ void AddressClient::login(){
 void AddressClient::choose_patient(){
     std::stringstream msg{last_msg_};
     msg >> last_msg_ >> last_msg_;
-    full_str_.push_back(last_msg_);
+    full_.push_back(last_msg_);
     
-    card_id_ = editor.choose(full_str_);
+    card_id_ = editor.choose(full_);
     
         
     if (card_id_ != 0){
         write("Patient is chosen. Write 'info', 'add' or 'view'*");
-        full_str_.clear();
+        full_.clear();
         state_ = 2;
     } 
     else {
-        full_str_.clear();
+        full_.clear();
         write("Patient is not found; enter 'choose' and try again*");
     }
 
@@ -163,7 +163,7 @@ void AddressClient::view_patient(){
             for (auto rec : records[0]){
                 ans += rec + "\n";
             }
-            full_str_.clear();
+            full_.clear();
             write(ans + "*");
             state_= 2;
             return;
@@ -174,19 +174,19 @@ void AddressClient::view_patient(){
 }
 
 void AddressClient::add_record(){
-    if(full_str_.empty()){
+    if(full_.empty()){
         // extracting substrings from client's message
         std::size_t pos = last_msg_.find("|");
         for (int i= 0; i < 5; ++i){
             std::size_t prev_pos = ++pos;
             pos = last_msg_.find('|', prev_pos);
-            full_str_.push_back(last_msg_.substr(prev_pos, pos - prev_pos));
+            full_.push_back(last_msg_.substr(prev_pos, pos - prev_pos));
         }
-        full_str_.push_back(last_msg_.substr(pos + 1));
+        full_.push_back(last_msg_.substr(pos + 1));
 
         write("The following record for card №" + std::to_string(card_id_) + 
               " will be added; type y/n to add/delete it: \n");
-        for(auto str : full_str_){
+        for(auto str : full_){
             write(str + "\n");
         }
         write("*");
@@ -194,10 +194,10 @@ void AddressClient::add_record(){
     }
     else{
         if (last_msg_[0] == 'y' or last_msg_[0] == 'Y'){            
-            bool isAdded = editor.add_record(card_id_, full_str_);
+            bool isAdded = editor.add_record(card_id_, full_);
             
             state_ = 2;
-            full_str_.clear();
+            full_.clear();
             if(isAdded){
                 write("Record was added*");
             } else{
@@ -207,7 +207,7 @@ void AddressClient::add_record(){
         } 
         else{
             state_ = 2;
-            full_str_.clear();
+            full_.clear();
             write("Adding was not confirmed*");
         }
     }
@@ -216,11 +216,11 @@ void AddressClient::add_record(){
 void AddressClient::view_record(){
     std::stringstream msg{last_msg_};
     msg >> last_msg_ >> last_msg_;
-    full_str_.push_back(last_msg_);
+    full_.push_back(last_msg_);
     msg >> last_msg_;
-    full_str_.push_back(last_msg_);
+    full_.push_back(last_msg_);
 
-    Records records = editor.view_records(full_str_, card_id_);
+    Records records = editor.view_records(full_, card_id_);
 
     if (!records.empty()){
         std::string ans{};
@@ -231,11 +231,11 @@ void AddressClient::view_record(){
             // separate records
             ans += "-----------------------\n";
         }
-        full_str_.clear();
+        full_.clear();
         write(ans + "*");
     } 
     else{
-        full_str_.clear();
+        full_.clear();
         write("Records not found*");
     }
 }

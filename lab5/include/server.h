@@ -24,7 +24,7 @@ private:
     int state_;
     int card_id_;
     int user_id_;
-    Record full_str_;
+    Record full_;
     std::string last_msg_;
     
     void write(const std::string& ans);
