@@ -40,8 +40,6 @@ void AddressClient::answer()
         
     } catch (boost::system::system_error& ) {
         std::cerr << "Error answering\n";
-        
-        sock_.close();
         st_ = false;
     }
 }
@@ -260,15 +258,19 @@ void AddressClient::write(const std::string& ans) {
 void acceptClients() {
     using namespace boost::asio;
     ip::tcp::acceptor acceptor(service, ip::tcp::endpoint(ip::tcp::v4(), 8001));
+    std::vector<std::thread> threads;
     while (true){ 
         AddressClient_ptr new_(new AddressClient);
         acceptor.accept(new_->get_socket());
-        std::cout << "Accepted\n";
-        boost::thread th{run_client, new_};
-        th.detach();
+        std::cout << "Accepted\n";        
+        threads.emplace_back(run_client, new_);
         boost::lock_guard<boost::mutex> lk(cl_mtx);
         clients.push_back(new_);
     }
+    for(auto &th : threads){
+        th.join();
+    }
+    
 }
 
 void run_client(AddressClient_ptr ptr){
