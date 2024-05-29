@@ -10,6 +10,8 @@
 using Record = std::vector<std::string>;
 using Records = std::vector<Record>;
 
+extern std::mutex cout_mtx; // for cout/cin
+
 static int callback(void* data, int argc, char** argv, char** azColName);
 
 class dbEditor{

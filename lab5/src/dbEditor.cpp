@@ -2,24 +2,30 @@
 
 #include <iostream>
 
+std::mutex cout_mtx;
 
 dbEditor::dbEditor(){
     int rc = sqlite3_open("../sqlite.db", &db_);
 
     if (rc != SQLITE_OK){
-        std::cerr << "Error opening db: " << sqlite3_errmsg(db_) << "\n";
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cerr << "Error opening db: " << sqlite3_errmsg(db_) << "\n";
+        }
         opened_ = false;
         sqlite3_close(db_);
     } 
     else {
-        std::cout << "Opened database successfully\n";
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cout << "Opened database successfully\n";
+        }
         opened_ = true;
     }
 }
 
 int dbEditor::login(const Record& in) {
     if(in.size() != 2) {
-        std::cout << "\nError: wrong number in vector\n";
         return 0;
     }
 
@@ -35,7 +41,6 @@ int dbEditor::login(const Record& in) {
 
         if (!records[0].empty()) return std::stoi(records[0][0]);
         else {
-            std::cout << "\n\nError: empty result after login\n\n"; 
             return 0;
         }
     }
@@ -45,7 +50,6 @@ int dbEditor::login(const Record& in) {
 // finds given patient' card id; returns 0 if not found
 int dbEditor::choose(const Record& in){
     if(in.size() != 1){
-        std::cout << "\nError: wrong number in vector\n";
         return 0;
     }
 
@@ -61,7 +65,6 @@ int dbEditor::choose(const Record& in){
             return std::stoi(records[0][0]);
         }
         else {
-            std::cout << "\n\nError: empty result after choose\n\n"; 
             return 0;
         }
     }
@@ -91,7 +94,10 @@ bool dbEditor::add_record(int id_card, const Record& in){
         ret = sqlite3_exec(db_, query.data(), 0, 0, &errmsg);
     }
     if (ret != SQLITE_OK) {
-        std::cerr << "Error in insert statement " << "[" << errmsg << "]\n";
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cerr << "Error in insert statement " << "[" << errmsg << "]\n";
+        }
         sqlite3_free(errmsg);
         return 0;
     } 
@@ -127,11 +133,17 @@ static int callback(void* data, int argc, char** argv, char** azColName){
         records->emplace_back(argv, argv + argc);
     }
     catch (std::exception const& e){
-        std::cout << "Exception: " << e.what() << "\n\n";
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cout << "Exception: " << e.what() << "\n\n";
+        }
         return 1;
     }
     catch (...){
-        std::cout << "Smth went wrong\n";
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cout << "Smth went wrong\n";
+        }
         return 1;
     }
     return 0;
@@ -144,17 +156,23 @@ static int callbackv2(void* data, int argc, char** argv, char** azColName){
         for(int i = 0; i < argc; ++i){
             std::string st = std::string(azColName[i]);
             st += ": ";
-            st += argv[i] ? argv[i] : "-";
+            st += argv[i] ? argv[i] : "-"; // consider NULL values
             record[i] = st;
         }
         records->emplace_back(record);
     }
     catch (std::exception const& e){
-        std::cerr << "Exception: " << e.what() << "\n\n";
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cerr << "Exception: " << e.what() << "\n\n";
+        }
         return 1;
     }
     catch (...){
-        std::cerr << "Smth went wrong\n";
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cerr << "Smth went wrong\n";
+        }
         return 1;
     }
     return 0;
@@ -171,11 +189,17 @@ Records dbEditor::select_stmt(const std::string& stmt, bool flag){
         else ret = sqlite3_exec(db_, stmt.data(), callbackv2, &records, &errmsg);
     }
     if (ret != SQLITE_OK){
-        std::cerr << "Error in select statement " << stmt << "[" << errmsg << "]\n";
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cerr << "Error in select statement " << stmt << "[" << errmsg << "]\n";
+        }
         sqlite3_free(errmsg);
     }
     else{
-        std::cout << records.size() << " records returned successfully from select_stmt.\n";
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cout << records.size() << " records returned successfully from select_stmt.\n";
+        }
     }
 
     return records;
