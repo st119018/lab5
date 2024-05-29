@@ -24,6 +24,11 @@ dbEditor::dbEditor(){
     }
 }
 
+bool dbEditor::get_opened()
+{
+    return opened_;
+}
+
 int dbEditor::login(const Record& in) {
     if(in.size() != 2) {
         return 0;

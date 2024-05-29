@@ -10,6 +10,7 @@
 #include "dbEditor.h"
 
 extern boost::asio::io_service service;
+extern dbEditor editor;
 
 class AddressClient;
 typedef boost::shared_ptr<AddressClient> AddressClient_ptr;

@@ -25,6 +25,8 @@ class dbEditor{
     public:
     dbEditor();
 
+    bool get_opened();
+
     int login(const Record& in);
     
     int choose(const Record& in);
