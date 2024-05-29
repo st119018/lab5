@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 14)            # Enable c++14 standard
 
 file(GLOB SOURCE_FILES "src/*.cpp")
 file(GLOB SOURCE_FILES2 "src2/*.cpp")
+file(GLOB SOURCE_FILES3 "test/*.cpp")
 
 set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
@@ -22,6 +23,7 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 add_executable(client ${SOURCE_FILES2})
 
+add_executable(test ${SOURCE_FILES3})
 
 if(Boost_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIR})
@@ -29,6 +31,9 @@ if(Boost_FOUND)
 
     target_include_directories(client PUBLIC ${Boost_INCLUDE_DIR})
     target_link_libraries(client ${Boost_LIBRARIES})
+    
+    target_include_directories(test PUBLIC ${Boost_INCLUDE_DIR})
+    target_link_libraries(test ${Boost_LIBRARIES})
 
     message(STATUS "Found BOOST ${Boost_VERSION_STRING}")
 else()

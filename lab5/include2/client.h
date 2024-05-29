@@ -1,5 +1,4 @@
 #include <boost/thread.hpp>
-#include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -16,8 +15,8 @@ inline bool isInteger(const std::string & s) {
     return (*p == 0);
 }
 
-struct AddessServer {
-    AddessServer() 
+struct AddressServer {
+    AddressServer() 
         : sock_(service), started_(true) {}
     
     void connect(ip::tcp::endpoint ep) {
@@ -42,7 +41,13 @@ struct AddessServer {
             read_answer();
         }
     }
-    
+
+    void test_write(const std::string s){
+        write(s + '*');
+        read_answer();
+        std::cout << "\n";
+    }
+
 private:
     void get_request() {
         std::string request;
@@ -216,7 +221,7 @@ private:
 
 ip::tcp::endpoint ep( ip::address::from_string("127.0.0.1"), 8001);
 void run_client() {
-    AddessServer client;
+    AddressServer client;
     try {
         client.connect(ep);
         std::cout << "Connected to server\n";
