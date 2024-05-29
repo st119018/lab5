@@ -9,6 +9,7 @@ std::vector<AddressClient_ptr> clients;
 boost::mutex cl_mtx;
 boost::condition_variable cv;
 bool changed{false};
+std::mutex cout_mtx;
 
 boost::asio::ip::tcp::socket& AddressClient::get_socket(){ 
     return sock_; 
@@ -24,13 +25,11 @@ void AddressClient::run(){
     }
 }
 
-bool AddressClient::get_st() const
-{
+bool AddressClient::get_st() const{
     return st_;
 }
 
-void AddressClient::answer()
-{
+void AddressClient::answer(){
     try {
         if (sock_.available()){
         already_read_ += sock_.read_some(boost::asio::buffer(buffer_ + already_read_, bufferSize - already_read_));
@@ -96,7 +95,10 @@ void AddressClient::processRequest(){
             break;
             
         default:
-            std::cout << "Error: wrong state!!!\n";
+            {
+                std::lock_guard<std::mutex> lk(cout_mtx);
+                std::cout << "Error: wrong state\n";
+            }
             full_str_.clear();
             write("Smth went wrong on server side; try again*");      
     }
@@ -111,7 +113,6 @@ std::string AddressClient::getmsg() {
     std::size_t pos = std::find(buffer_, buffer_ + already_read_, '*') - buffer_;
     // getting message from client
     std::string msg(buffer_, pos); 
-    std::cout << "msg: " << msg << "\n";
     // deleting messege from buffer
     std::copy(buffer_ + already_read_, buffer_ + bufferSize, buffer_); 
     already_read_ -= pos + 1;
@@ -262,7 +263,10 @@ void acceptClients() {
     while (true){ 
         AddressClient_ptr new_(new AddressClient);
         acceptor.accept(new_->get_socket());
-        std::cout << "Accepted\n";        
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cout << "Client accepted\n";
+        }        
         threads.emplace_back(run_client, new_);
         boost::lock_guard<boost::mutex> lk(cl_mtx);
         clients.push_back(new_);
