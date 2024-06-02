@@ -10,6 +10,7 @@
 #include "dbEditor.h"
 
 extern boost::asio::io_service service;
+extern dbEditor editor;
 
 class AddressClient;
 typedef boost::shared_ptr<AddressClient> AddressClient_ptr;
@@ -53,6 +54,8 @@ public:
     AddressClient(): sock_(service), st_(1), already_read_(0), state_(0) {};
     
     void run();
+
+    bool get_st() const;
 
     boost::asio::ip::tcp::socket& get_socket(); 
 

@@ -3,9 +3,8 @@
 #include <string>
 #include <iostream>
 
-dbEditor editor;
+dbEditor editor;                        // object for working with db
 boost::asio::io_service service;
-std::vector<AddressClient_ptr> clients;
 
 boost::asio::ip::tcp::socket& AddressClient::get_socket(){ 
     return sock_; 
@@ -13,6 +12,8 @@ boost::asio::ip::tcp::socket& AddressClient::get_socket(){
 
 AddressClient::~AddressClient(){
     sock_.close();
+    std::lock_guard<std::mutex> lk(cout_mtx);
+    std::cout << "Client disconnected\n";
 }
 
 void AddressClient::run(){
@@ -21,19 +22,25 @@ void AddressClient::run(){
     }
 }
 
-void AddressClient::answer()
-{
+bool AddressClient::get_st() const{
+    return st_;
+}
+
+void AddressClient::answer(){
     try {
         if (sock_.available()){
-        already_read_ += sock_.read_some(boost::asio::buffer(buffer_ + already_read_, bufferSize - already_read_));
+            // reading from client
+            already_read_ += sock_.read_some(boost::asio::buffer(buffer_ + already_read_, 
+                                            bufferSize - already_read_));
         }
         
         processRequest();
         
     } catch (boost::system::system_error& ) {
-        std::cerr << "Error answering\n";
-        
-        sock_.close();
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cerr << "Error answering\n";
+        }
         st_ = false;
     }
 }
@@ -43,14 +50,16 @@ void AddressClient::processRequest(){
     if (!findStar()) {
         return; // message is not full
     }
-    
+    // getting message from client
     last_msg_ = getmsg();
-
+    
+    // answering
+    // 1st word from message and current state 
+    // determine what server will do
     if(last_msg_.find("quit") == 0){
         quit();
         return;
     }
-
     switch(state_)
     {
         case 0:
@@ -90,13 +99,17 @@ void AddressClient::processRequest(){
             break;
             
         default:
-            std::cout << "Error: wrong state!!!\n";
+            {
+                std::lock_guard<std::mutex> lk(cout_mtx);
+                std::cout << "Error: wrong state\n";
+            }
             full_.clear();
             write("Smth went wrong on server side; try again*");      
     }
 }
 
 bool AddressClient::findStar() {
+    // finding end of message('*')
     bool found = std::find(buffer_, buffer_ + already_read_, '*') < buffer_ + already_read_;
     return found;
 }
@@ -105,7 +118,6 @@ std::string AddressClient::getmsg() {
     std::size_t pos = std::find(buffer_, buffer_ + already_read_, '*') - buffer_;
     // getting message from client
     std::string msg(buffer_, pos); 
-    std::cout << "msg: " << msg << "\n";
     // deleting messege from buffer
     std::copy(buffer_ + already_read_, buffer_ + bufferSize, buffer_); 
     already_read_ -= pos + 1;
@@ -113,12 +125,13 @@ std::string AddressClient::getmsg() {
 }
 
 void AddressClient::login(){
+    // extracting words from message
     std::stringstream msg{last_msg_};
     msg >> last_msg_ >> last_msg_;
     full_.push_back(last_msg_);
     msg >> last_msg_;
     full_.push_back(last_msg_);
-    
+    // make request to db 
     user_id_ = editor.login(full_);
     
     if(user_id_ != 0){
@@ -135,12 +148,12 @@ void AddressClient::login(){
 }
 
 void AddressClient::choose_patient(){
+    // extracting words
     std::stringstream msg{last_msg_};
     msg >> last_msg_ >> last_msg_;
     full_.push_back(last_msg_);
-    
+    // make request to db
     card_id_ = editor.choose(full_);
-    
         
     if (card_id_ != 0){
         write("Patient is chosen. Write 'info', 'add' or 'view'*");
@@ -183,7 +196,8 @@ void AddressClient::add_record(){
             full_.push_back(last_msg_.substr(prev_pos, pos - prev_pos));
         }
         full_.push_back(last_msg_.substr(pos + 1));
-
+        
+        // ask client for consent to addition
         write("The following record for card №" + std::to_string(card_id_) + 
               " will be added; type y/n to add/delete it: \n");
         for(auto str : full_){
@@ -193,7 +207,8 @@ void AddressClient::add_record(){
         return;
     }
     else{
-        if (last_msg_[0] == 'y' or last_msg_[0] == 'Y'){            
+        if (last_msg_[0] == 'y' or last_msg_[0] == 'Y'){ // client agreed to add record
+            // adding new record
             bool isAdded = editor.add_record(card_id_, full_);
             
             state_ = 2;
@@ -214,16 +229,17 @@ void AddressClient::add_record(){
 }
 
 void AddressClient::view_record(){
+    // extracting from message
     std::stringstream msg{last_msg_};
     msg >> last_msg_ >> last_msg_;
     full_.push_back(last_msg_);
     msg >> last_msg_;
     full_.push_back(last_msg_);
-
+    // make request to db
     Records records = editor.view_records(full_, card_id_);
 
     if (!records.empty()){
-        std::string ans{};
+        std::string ans = "\n";
         for(auto recs: records){
             for (auto rec : recs){
                 ans += rec + "\n";
@@ -252,14 +268,16 @@ void AddressClient::write(const std::string& ans) {
 void acceptClients() {
     using namespace boost::asio;
     ip::tcp::acceptor acceptor(service, ip::tcp::endpoint(ip::tcp::v4(), 8001));
-    while (true) { 
+    while (true){ 
         AddressClient_ptr new_(new AddressClient);
         acceptor.accept(new_->get_socket());
-        std::cout << "Accepted\n";
-        
+        {
+            std::lock_guard<std::mutex> lk(cout_mtx);
+            std::cout << "Client is accepted\n";
+        }  
         boost::thread th{run_client, new_};
-        th.detach();
-    }
+        th.detach(); 
+    }  
 }
 
 void run_client(AddressClient_ptr ptr){
