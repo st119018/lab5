@@ -1,14 +1,14 @@
 ## Лабораторная работа №5
 
 ### Сборка
-0. mkdir build
-0. cd build
-0. cmake ../
-0. cmake --build .
-0. Запустить:
-    0. сервер: `.\server`
-    0. клиента: `.\client`
-    0. тест: `.\test`
+1. mkdir build
+2. cd build
+3. cmake ../
+4. cmake --build .
+5. Запустить:
+- сервер: `.\server`
+- клиента: `.\client`   
+- тест: `.\test`
 
 
 ---
