@@ -1,0 +1,299 @@
+(User 0) Server answered: You are logged in. Write 'choose' to choose patient
+(User 0) Server answered: Patient is chosen. Write 'info', 'add' or 'view'
+(User 0) Server answered: 
+id_card: 125
+surname: Ruslan
+name: Nuriyev
+passport: 9559315414
+snils: 222
+insur_comp: -
+benefit_category: -
+gender: -
+birthdate: -
+registration: -
+family_status: -
+
+(User 0) Server answered: Records not found
+(User 0) Server answered: The following record for card №125 will be added; type y/n to add/delete it: 
+2024-01-10
+-
+-
+-
+-
+-
+
+(User 3) Server answered: You are logged in. Write 'choose' to choose patient
+(User 3) Server answered: Patient is chosen. Write 'info', 'add' or 'view'
+(User 4) Server answered: You are logged in. Write 'choose' to choose patient
+(User 4) Server answered: Patient is chosen. Write 'info', 'add' or 'view'
+(User 5) Server answered: You are logged in. Write 'choose' to choose patient
+(User 5) Server answered: Patient is chosen. Write 'info', 'add' or 'view'
+(User 7) Server answered: You are logged in. Write 'choose' to choose patient
+(User 6) Server answered: You are logged in. Write 'choose' to choose patient
+(User 6) Server answered: Patient is chosen. Write 'info', 'add' or 'view'
+(User 2) Server answered: You are logged in. Write 'choose' to choose patient
+(User 2) Server answered: Patient is chosen. Write 'info', 'add' or 'view'
+(User 1) Server answered: You are logged in. Write 'choose' to choose patient
+(User 1) Server answered: Patient is chosen. Write 'info', 'add' or 'view'
+(User 4) Server answered: 
+id_card: 125
+surname: Ruslan
+name: Nuriyev
+passport: 9559315414
+snils: 222
+insur_comp: -
+benefit_category: -
+gender: -
+birthdate: -
+registration: -
+family_status: -
+
+(User 4) Server answered: 
+exam_date: 2024-01-10
+complaints: -
+observation: -
+consultion: -
+medication: -
+doctor: -
+-----------------------
+
+(User 7) Server answered: Patient is chosen. Write 'info', 'add' or 'view'
+(User 7) Server answered: 
+id_card: 125
+surname: Ruslan
+name: Nuriyev
+passport: 9559315414
+snils: 222
+insur_comp: -
+benefit_category: -
+gender: -
+birthdate: -
+registration: -
+family_status: -
+
+(User 7) Server answered: 
+exam_date: 2024-01-10
+complaints: -
+observation: -
+consultion: -
+medication: -
+doctor: -
+-----------------------
+
+(User 7) Server answered: The following record for card №125 will be added; type y/n to add/delete it: 
+2024-01-10
+-
+-
+-
+-
+-
+
+(User 5) Server answered: 
+id_card: 125
+surname: Ruslan
+name: Nuriyev
+passport: 9559315414
+snils: 222
+insur_comp: -
+benefit_category: -
+gender: -
+birthdate: -
+registration: -
+family_status: -
+
+(User 1) Server answered: 
+id_card: 125
+surname: Ruslan
+name: Nuriyev
+passport: 9559315414
+snils: 222
+insur_comp: -
+benefit_category: -
+gender: -
+birthdate: -
+registration: -
+family_status: -
+
+(User 7) Server answered: Record was added
+(User 3) Server answered: 
+id_card: 125
+surname: Ruslan
+name: Nuriyev
+passport: 9559315414
+snils: 222
+insur_comp: -
+benefit_category: -
+gender: -
+birthdate: -
+registration: -
+family_status: -
+
+(User 3) Server answered: 
+exam_date: 2024-01-10
+complaints: -
+observation: -
+consultion: -
+medication: -
+doctor: -
+-----------------------
+exam_date: 2024-01-10
+complaints: -
+observation: -
+consultion: -
+medication: -
+doctor: -
+-----------------------
+
+(User 2) Server answered: 
+id_card: 125
+surname: Ruslan
+name: Nuriyev
+passport: 9559315414
+snils: 222
+insur_comp: -
+benefit_category: -
+gender: -
+birthdate: -
+registration: -
+family_status: -
+
+(User 2) Server answered: 
+exam_date: 2024-01-10
+complaints: -
+observation: -
+consultion: -
+medication: -
+doctor: -
+-----------------------
+exam_date: 2024-01-10
+complaints: -
+observation: -
+consultion: -
+medication: -
+doctor: -
+-----------------------
+
+(User 5) Server answered: 
+exam_date: 2024-01-10
+complaints: -
+observation: -
+consultion: -
+medication: -
+doctor: -
+-----------------------
+
+(User 5) Server answered: The following record for card №125 will be added; type y/n to add/delete it: 
+2024-01-10
+-
+-
+-
+-
+-
+
+(User 5) Server answered: Record was added
+(User 6) Server answered: 
+id_card: 125
+surname: Ruslan
+name: Nuriyev
+passport: 9559315414
+snils: 222
+insur_comp: -
+benefit_category: -
+gender: -
+birthdate: -
+registration: -
+family_status: -
+
+(User 6) Server answered: 
+exam_date: 2024-01-10
+complaints: -
+observation: -
+consultion: -
+medication: -
+doctor: -
+-----------------------
+exam_date: 2024-01-10
+complaints: -
+observation: -
+consultion: -
+medication: -
+doctor: -
+-----------------------
+exam_date: 2024-01-10
+complaints: -
+observation: -
+consultion: -
+medication: -
+doctor: -
+-----------------------
+
+(User 3) Server answered: The following record for card №125 will be added; type y/n to add/delete it: 
+2024-01-10
+-
+-
+-
+-
+-
+
+(User 3) Server answered: Record was added
+(User 0) Server answered: Record was added
+(User 0) Server answered: You are disconnected
+
+(User 1) Server answered: 
+exam_date: 2024-01-10
+complaints: -
+observation: -
+consultion: -
+medication: -
+doctor: -
+-----------------------
+
+(User 1) Server answered: The following record for card №125 will be added; type y/n to add/delete it: 
+2024-01-10
+-
+-
+-
+-
+-
+
+(User 7) Server answered: You are disconnected
+
+(User 6) Server answered: The following record for card №125 will be added; type y/n to add/delete it: 
+2024-01-10
+-
+-
+-
+-
+-
+
+(User 5) Server answered: You are disconnected
+
+(User 2) Server answered: The following record for card №125 will be added; type y/n to add/delete it: 
+2024-01-10
+-
+-
+-
+-
+-
+
+(User 2) Server answered: Record was added
+(User 4) Server answered: The following record for card №125 will be added; type y/n to add/delete it: 
+2024-01-10
+-
+-
+-
+-
+-
+
+(User 4) Server answered: Record was added
+(User 3) Server answered: You are disconnected
+
+(User 6) Server answered: Record was added
+(User 6) Server answered: You are disconnected
+
+(User 1) Server answered: Record was added
+(User 1) Server answered: You are disconnected
+
+(User 4) Server answered: You are disconnected
+
+(User 2) Server answered: You are disconnected
