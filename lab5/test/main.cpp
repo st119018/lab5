@@ -15,13 +15,11 @@ void send_requests(int i){
     cl.test_write("choose 222", i);
     cl.test_write("info", i);
     cl.test_write("view all", i);
-    cl.test_write("add|2024-03-10", i);
+    cl.test_write("add|2024-01-10|-|-|-|-|-", i); 
     cl.test_write("y", i);
     cl.test_write("quit", i);
     cl.close();
 }
-
-
 
 int main(){
     std::thread threads[8];
