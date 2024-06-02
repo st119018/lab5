@@ -172,7 +172,7 @@ void AddressClient::view_patient(){
     
     if(!records.empty()){
         if(!records[0].empty()){
-            std::string ans{};
+            std::string ans = "\n";
             for (auto rec : records[0]){
                 ans += rec + "\n";
             }
