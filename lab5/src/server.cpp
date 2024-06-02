@@ -5,10 +5,6 @@
 
 dbEditor editor;                        // object for working with db
 boost::asio::io_service service;
-std::vector<AddressClient_ptr> clients; // vector of accepted clients
-boost::mutex cl_mtx;                    // mutex for clients
-boost::condition_variable cv;           // cond var for deleting clients
-bool changed{false};                    // for cond var
 
 boost::asio::ip::tcp::socket& AddressClient::get_socket(){ 
     return sock_; 
@@ -16,6 +12,8 @@ boost::asio::ip::tcp::socket& AddressClient::get_socket(){
 
 AddressClient::~AddressClient(){
     sock_.close();
+    std::lock_guard<std::mutex> lk(cout_mtx);
+    std::cout << "Client disconnected\n";
 }
 
 void AddressClient::run(){
@@ -241,7 +239,7 @@ void AddressClient::view_record(){
     Records records = editor.view_records(full_str_, card_id_);
 
     if (!records.empty()){
-        std::string ans{};
+        std::string ans = "\n";
         for(auto recs: records){
             for (auto rec : recs){
                 ans += rec + "\n";
@@ -270,43 +268,18 @@ void AddressClient::write(const std::string& ans) {
 void acceptClients() {
     using namespace boost::asio;
     ip::tcp::acceptor acceptor(service, ip::tcp::endpoint(ip::tcp::v4(), 8001));
-    std::vector<std::thread> threads;
     while (true){ 
         AddressClient_ptr new_(new AddressClient);
         acceptor.accept(new_->get_socket());
         {
             std::lock_guard<std::mutex> lk(cout_mtx);
             std::cout << "Client is accepted\n";
-        }        
-        threads.emplace_back(run_client, new_);
-        boost::lock_guard<boost::mutex> lk(cl_mtx);
-        clients.push_back(new_);
-    }
-    for(auto &th : threads){
-        th.join();
-    }
-    
+        }  
+        boost::thread th{run_client, new_};
+        th.detach(); 
+    }  
 }
 
 void run_client(AddressClient_ptr ptr){
     ptr->run();
-    {
-        boost::lock_guard<boost::mutex> lk(cl_mtx);
-        changed = true;
-    }
-    cv.notify_one();
-}
-
-void delClients(){
-    while(true){
-        boost::unique_lock<boost::mutex> lk(cl_mtx);
-        cv.wait(lk, []{return changed;});
-
-        for(auto cl = clients.begin(), e = clients.end(); cl != e; ++cl){
-            if(!(*cl)->get_st()){
-                clients.erase(cl);
-            }
-        }
-        changed = false;
-    }
 }

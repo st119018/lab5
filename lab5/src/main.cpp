@@ -7,9 +7,11 @@ int main(){
     if(!editor.get_opened()){
         return 0;
     }
-    boost::thread_group th;
-    th.create_thread(acceptClients);
-    th.create_thread(delClients);
-    th.join_all();
+    try{
+        boost::thread th(acceptClients);
+        th.join();
+    } catch(...){
+        std::cerr << "Error\n";
+    }
     return 0;
 }

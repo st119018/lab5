@@ -69,6 +69,4 @@ void acceptClients();
 
 void run_client(AddressClient_ptr ptr);
 
-void delClients();
-
 #endif // SERVER_H
