@@ -1,20 +1,38 @@
 #include "client.h"
 
-int main(){
+std::mutex mtx;
+
+void send_requests(int i){
     AddressServer cl;
     try {
         cl.connect(ep);
     } catch(boost::system::system_error & err) {
-        std::cout << "Error client terminated: " << err.what() << std::endl;
-        return 1;
+        std::lock_guard<std::mutex> lk(mtx);
+        std::cerr << "Error client terminated: " << err.what() << std::endl;
+        return;
     }
-    cl.test_write("login RL 123");
-    cl.test_write("choose 222");
-    cl.test_write("info");
-    cl.test_write("view all");
-    cl.test_write("add|2024-03-10|-|-|-|-|-");
-    cl.test_write("y");
-    cl.test_write("quit");
+    cl.test_write("login RL 123", i);
+    cl.test_write("choose 222", i);
+    cl.test_write("info", i);
+    cl.test_write("view all", i);
+    cl.test_write("add|2024-03-10", i);
+    cl.test_write("y", i);
+    cl.test_write("quit", i);
     cl.close();
+}
+
+
+
+int main(){
+    std::thread threads[8];
+
+    for(int i = 0; i < 8; i++){
+        threads[i] = std::thread(send_requests, i);
+    }
+
+    for(auto &th : threads){
+        th.join();
+    }
+
     return 0;
 }

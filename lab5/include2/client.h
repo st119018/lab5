@@ -3,8 +3,12 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <iostream>
+#include <mutex>
+
 using namespace boost::asio;
 io_service service;
+
+extern std::mutex mtx;
 
 inline bool isInteger(const std::string & s) {
     if(s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+'))){
@@ -42,8 +46,10 @@ struct AddressServer {
         }
     }
 
-    void test_write(const std::string s){
+    void test_write(const std::string s, int i){
         write(s + '*');
+        std::lock_guard<std::mutex> lk(mtx);
+        std::cout << "(User " << i << ") ";
         read_answer();
         std::cout << "\n";
     }
@@ -175,6 +181,7 @@ private:
         }
         std::string ans = getmsg();
         std::cout << "Server answered: " << ans;
+
         
     }
 
@@ -216,7 +223,7 @@ private:
     int already_read_;
     char buff_[buffSize_];
     bool started_;
-    
+        
 };
 
 ip::tcp::endpoint ep( ip::address::from_string("127.0.0.1"), 8001);
