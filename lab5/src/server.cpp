@@ -6,27 +6,27 @@
 dbEditor editor;                        // object for working with db
 boost::asio::io_service service;
 
-boost::asio::ip::tcp::socket& AddressClient::get_socket(){ 
+boost::asio::ip::tcp::socket& Server::get_socket(){ 
     return sock_; 
 }
 
-AddressClient::~AddressClient(){
+Server::~Server(){
     sock_.close();
     std::lock_guard<std::mutex> lk(cout_mtx);
     std::cout << "Client disconnected\n";
 }
 
-void AddressClient::run(){
+void Server::run(){
     while(st_){
         answer();
     }
 }
 
-bool AddressClient::get_st() const{
+bool Server::get_st() const{
     return st_;
 }
 
-void AddressClient::answer(){
+void Server::answer(){
     try {
         if (sock_.available()){
             // reading from client
@@ -45,7 +45,7 @@ void AddressClient::answer(){
     }
 }
 
-void AddressClient::processRequest(){
+void Server::processRequest(){
     
     if (!findStar()) {
         return; // message is not full
@@ -108,13 +108,13 @@ void AddressClient::processRequest(){
     }
 }
 
-bool AddressClient::findStar() {
+bool Server::findStar() {
     // finding end of message('*')
     bool found = std::find(buffer_, buffer_ + already_read_, '*') < buffer_ + already_read_;
     return found;
 }
 
-std::string AddressClient::getmsg() {
+std::string Server::getmsg() {
     std::size_t pos = std::find(buffer_, buffer_ + already_read_, '*') - buffer_;
     // getting message from client
     std::string msg(buffer_, pos); 
@@ -124,7 +124,7 @@ std::string AddressClient::getmsg() {
     return msg;
 }
 
-void AddressClient::login(){
+void Server::login(){
     // extracting words from message
     std::stringstream msg{last_msg_};
     msg >> last_msg_ >> last_msg_;
@@ -147,7 +147,7 @@ void AddressClient::login(){
     
 }
 
-void AddressClient::choose_patient(){
+void Server::choose_patient(){
     // extracting words
     std::stringstream msg{last_msg_};
     msg >> last_msg_ >> last_msg_;
@@ -167,7 +167,7 @@ void AddressClient::choose_patient(){
 
 }
 
-void AddressClient::view_patient(){
+void Server::view_patient(){
     Records records = editor.view_info(card_id_);
     
     if(!records.empty()){
@@ -186,7 +186,7 @@ void AddressClient::view_patient(){
     
 }
 
-void AddressClient::add_record(){
+void Server::add_record(){
     if(full_.empty()){
         // extracting substrings from client's message
         std::size_t pos = last_msg_.find("|");
@@ -228,7 +228,7 @@ void AddressClient::add_record(){
     }
 }
 
-void AddressClient::view_record(){
+void Server::view_record(){
     // extracting from message
     std::stringstream msg{last_msg_};
     msg >> last_msg_ >> last_msg_;
@@ -256,30 +256,11 @@ void AddressClient::view_record(){
     }
 }
 
-void AddressClient::quit(){
+void Server::quit(){
     write("You are disconnected\n*");
     st_ = 0;
 }
 
-void AddressClient::write(const std::string& ans) {
+void Server::write(const std::string& ans) {
     sock_.write_some(boost::asio::buffer(ans));
-}
-
-void acceptClients() {
-    using namespace boost::asio;
-    ip::tcp::acceptor acceptor(service, ip::tcp::endpoint(ip::tcp::v4(), 8001));
-    while (true){ 
-        AddressClient_ptr new_(new AddressClient);
-        acceptor.accept(new_->get_socket());
-        {
-            std::lock_guard<std::mutex> lk(cout_mtx);
-            std::cout << "Client is accepted\n";
-        }  
-        boost::thread th{run_client, new_};
-        th.detach(); 
-    }  
-}
-
-void run_client(AddressClient_ptr ptr){
-    ptr->run();
 }

@@ -12,10 +12,10 @@
 extern boost::asio::io_service service;
 extern dbEditor editor;
 
-class AddressClient;
-typedef boost::shared_ptr<AddressClient> AddressClient_ptr;
+class Server;
+typedef boost::shared_ptr<Server> Server_ptr;
 
-class AddressClient : public boost::enable_shared_from_this<AddressClient> {
+class Server : public boost::enable_shared_from_this<Server> {
 private:
     boost::asio::ip::tcp::socket sock_;
     enum { bufferSize = 1024 };
@@ -51,7 +51,7 @@ private:
     void answer();
 
 public:
-    AddressClient(): sock_(service), st_(1), already_read_(0), state_(0) {};
+    Server(): sock_(service), st_(1), already_read_(0), state_(0) {};
     
     void run();
 
@@ -59,14 +59,10 @@ public:
 
     boost::asio::ip::tcp::socket& get_socket(); 
 
-    ~AddressClient();
+    ~Server();
 
 };
 
 inline bool isInteger(const std::string & s);
-
-void acceptClients();
-
-void run_client(AddressClient_ptr ptr);
 
 #endif // SERVER_H

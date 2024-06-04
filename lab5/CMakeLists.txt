@@ -3,10 +3,6 @@ project(server)                       # Create project
 
 set(CMAKE_CXX_STANDARD 14)            # Enable c++14 standard
 
-file(GLOB SOURCE_FILES "src/*.cpp")
-file(GLOB SOURCE_FILES2 "src2/*.cpp")
-file(GLOB SOURCE_FILES3 "test/*.cpp")
-
 set(Boost_USE_STATIC_LIBS        ON) # only find static libs
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME    OFF)
@@ -15,13 +11,12 @@ find_package(Boost 1.74 REQUIRED COMPONENTS system filesystem thread)
 
 # headers directory 
 include_directories("${PROJECT_SOURCE_DIR}/include")
-include_directories("${PROJECT_SOURCE_DIR}/include2")
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} src/main_server.cpp src/dbEditor.cpp src/server.cpp)
 
-add_executable(client ${SOURCE_FILES2})
+add_executable(client src/main_client.cpp)
 
-add_executable(test ${SOURCE_FILES3})
+add_executable(test test/main_test.cpp)
 
 if(Boost_FOUND)
     target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIR})
@@ -34,13 +29,13 @@ if(Boost_FOUND)
     target_link_libraries(test ${Boost_LIBRARIES})
 else()
     message(STATUS "WEBSOCKET BOOST Not Found")
-endif()
+endif(Boost_FOUND)
 
 
 find_package(SQLite3 REQUIRED)
 
-if (SQLITE3_FOUND)
+if(SQLITE3_FOUND)
     target_link_libraries (${PROJECT_NAME} SQLite::SQLite3)
 else()
     message(STATUS "SQLite3 Not Found")
-endif (SQLITE3_FOUND)
+endif(SQLITE3_FOUND)

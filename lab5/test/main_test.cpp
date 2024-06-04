@@ -3,7 +3,7 @@
 std::mutex mtx;
 
 void send_requests(int i){
-    AddressServer cl;
+    Client cl;
     try {
         cl.connect(ep);
     } catch(boost::system::system_error & err) {
